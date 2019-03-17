@@ -68,5 +68,5 @@ int isPrime(const int pr){
   for(int i = 2; i <= sqrt(pr); i++)
     if (pr % i == 0)
       return 0;	
-	return 1;	
+  return 1;	
 }
