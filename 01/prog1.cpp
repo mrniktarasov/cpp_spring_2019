@@ -7,7 +7,8 @@ int primeCount ( int start, int end );
 int isPrime ( const int pr );
 
 
-int main ( int argc, char* argv[] ) {
+int main ( int argc, char* argv[] )
+{
 	int result;
 	int start;
 	int end;
@@ -28,7 +29,8 @@ int main ( int argc, char* argv[] ) {
 		return - 1;
 }
 
-int search ( int soughtFor ) {
+int search ( int soughtFor )
+{
 	int beg = 0;
 	int end = Size;
 	int middle;
@@ -46,7 +48,8 @@ int search ( int soughtFor ) {
 	return - 1;
 }
 
-int primeCount ( int start, int end ) {
+int primeCount ( int start, int end ) 
+{
 	int counter = 0;
 	int temp;
 	
@@ -68,7 +71,8 @@ int primeCount ( int start, int end ) {
 	return counter;	
 }
 
-int isPrime ( const int pr ) {
+int isPrime ( const int pr ) 
+{
 	if ( pr == 1 )
 		return 0;
 	for( int i = 2; i*i <= pr; i++ )
