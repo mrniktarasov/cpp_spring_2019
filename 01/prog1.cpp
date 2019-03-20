@@ -12,7 +12,7 @@ int main ( int argc, char* argv[] ) {
 	int start;
 	int end;
 	
-	if( argc >= 2 && ( argc - 1 ) % 2 == 0 )
+	if( argc >= 2 && ( ( argc - 1 ) % 2 ) == 0 )
 	{
 		for ( int i = 1; i < argc; i++ ) 
 		{
@@ -21,14 +21,14 @@ int main ( int argc, char* argv[] ) {
 			if (start == - 1 || end == - 1)
 				return - 1;
 			result = primeCount ( start, end );
-			std::cout<<result<<std::endl;
+			std::cout << result << std::endl;
 		} 
 		return 0;
 	} else 
 		return - 1;
 }
 
-int	search ( int soughtFor ) {
+int search ( int soughtFor ) {
 	int beg = 0;
 	int end = Size;
 	int middle;
@@ -46,7 +46,7 @@ int	search ( int soughtFor ) {
 	return - 1;
 }
 
-int primeCount	( int start, int end ) {
+int primeCount ( int start, int end ) {
 	int counter = 0;
 	int temp;
 	
