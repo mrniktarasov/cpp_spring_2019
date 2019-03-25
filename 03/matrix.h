@@ -2,29 +2,28 @@ class Matrix
 {
 	public:
 	class proxyMatrix
-			{	
-				private:
-					int* array1;
-					size_t co;
-				public:
-					friend class Matrix;
-					proxyMatrix () 
-          {
-					}
+		{	
+			private:
+				int* array1;
+				size_t co;
+			public:
+				friend class Matrix;
+				proxyMatrix () 
+          			{
+				}
 				
-					int& operator [] (size_t colNumber)
-					{
-						if ( colNumber >= co)
-							throw std::out_of_range("");
-						return array1[colNumber];
-					}
+				int& operator [] (size_t colNumber)
+				{
+					if ( colNumber >= co)
+						throw std::out_of_range("");
+					return array1[colNumber];
+				}
 	
-					const int& operator [] (size_t colNumber) const
-					{
-						if ( colNumber >= co)
-							throw std::out_of_range("");
-						return array1[colNumber];
-					}
+				const int& operator [] (size_t colNumber) const
+				{
+					if ( colNumber >= co)
+						throw std::out_of_range("");
+					return array1[colNumber];
 				};
 	private:
 		const size_t rows;
