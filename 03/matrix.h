@@ -5,10 +5,10 @@ class Matrix
 			{	
 				private:
 					size_t cols;
-					int* colNumber;
 				public:
-					friend class Matrix;
-					ProxyMatrix () 
+					int* colNumber;
+					ProxyMatrix ()
+
 					{
 					}
 				
@@ -26,8 +26,15 @@ class Matrix
 						return colNumber [colIndex];
 					}
 					
+					void setCols(size_t c)
+					{
+						cols = c;
+						colNumber = new int [cols];
+					}
+					
 					~ProxyMatrix()
 					{
+						
 					}
 				};
 	private:
@@ -43,8 +50,7 @@ class Matrix
 			rowNumber = new ProxyMatrix [rows];
 			for (size_t i = 0; i <= rows; ++i)
 			{
-				rowNumber[i].cols = cols;
-				rowNumber[i].colNumber = new int [cols];
+				rowNumber[i].setCols (cols);
 			}
 		}
 		
