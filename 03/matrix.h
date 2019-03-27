@@ -1,88 +1,92 @@
 class Matrix
 {
 	public:
-	class proxyMatrix
-		{	
-			private:
-				int* array1;
-				size_t co;
-			public:
-				friend class Matrix;
-				proxyMatrix () 
-          			{
-				}
+	class ProxyMatrix
+			{	
+				private:
+					size_t cols;
+					int* colNumber;
+				public:
+					friend class Matrix;
+					ProxyMatrix () 
+					{
+					}
 				
-				int& operator [] (size_t colNumber)
-				{
-					if ( colNumber >= co)
-						throw std::out_of_range("");
-					return array1[colNumber];
-				}
+					int& operator [] (size_t colIndex)
+					{
+						if ( colIndex >= cols)
+							throw std::out_of_range("");
+						return colNumber [colIndex];
+					}
 	
-				const int& operator [] (size_t colNumber) const
-				{
-					if ( colNumber >= co)
-						throw std::out_of_range("");
-					return array1[colNumber];
+					const int& operator [] (size_t colIndex) const
+					{
+						if ( colIndex >= cols)
+							throw std::out_of_range("");
+						return colNumber [colIndex];
+					}
+					
+					~ProxyMatrix()
+					{
+					}
 				};
 	private:
 		const size_t rows;
 		const size_t cols;
-		proxyMatrix* array2;
+		ProxyMatrix* rowNumber;
 	
 	public:
 		Matrix (const size_t ro, const size_t co)
 		: rows(ro)
 		, cols(co)
 		{
-			array2 = new proxyMatrix [rows+1];
-			for ( size_t i = 0; i <= rows; i++)
+			rowNumber = new ProxyMatrix [rows];
+			for (size_t i = 0; i <= rows; ++i)
 			{
-				array2[i].co = cols;
-				array2[i].array1 = new int [cols+1];
+				rowNumber[i].cols = cols;
+				rowNumber[i].colNumber = new int [cols];
 			}
 		}
 		
 		~Matrix ()
-		{	
-			for( int i = 0; i <= rows; i++)
-				delete[] array2[i].array1;
-			delete[] array2;
+		{
+			for ( size_t i = 0; i <= rows; i++)
+				delete [] rowNumber[i].colNumber;
+			delete [] rowNumber;
 		}
 		
 		const size_t getRows () const
 		{
-			const size_t temp = rows;
-			return temp;
+			return rows;
 		}
 	
 		const size_t getColumns () const
 		{
-			const size_t temp = cols;
-			return temp;
+			return cols;
 		}	
 	
-		proxyMatrix& operator [] (size_t rowNumber) 
+		ProxyMatrix& operator [] (size_t rowIndex) 
 		{
-			if(rowNumber >= rows)
+			if(rowIndex >= rows)
 				throw std::out_of_range("");
-			return array2[rowNumber];
+			return rowNumber [rowIndex];
 		}
 		
-		const proxyMatrix& operator [] (size_t rowNumber) const
+		const ProxyMatrix& operator [] (size_t rowIndex) const
 		{
-			if(rowNumber >= rows)
+			if(rowIndex >= rows)
 				throw std::out_of_range("");
-			return array2[rowNumber];
+			return rowNumber [rowIndex];
 		}
 
-		void operator *= (const int& num)
+		Matrix& operator *= (const int& num)
 		{
 			for (size_t i = 0; i < rows; ++i)
 				for (size_t j = 0; j < cols; ++j)
 				{
-					array2[i].array1[j] = (array2[i].array1[j] * num);
+					rowNumber[i].colNumber[j] = (rowNumber[i].colNumber[j] * num);
 				}
+			return *this;
 		}
 
 		bool operator == (const Matrix& other) const
@@ -92,7 +96,7 @@ class Matrix
 		
 			for (size_t i = 0; i < rows; ++i)
 				for (size_t j = 0; j < cols; ++j)
-					if (array2[i].array1[j] != other.array2[i].array1[j])
+					if (rowNumber[i].colNumber[j] != other.rowNumber[i].colNumber[j])
 						return false;
 			return true;
 		}
@@ -102,4 +106,3 @@ class Matrix
 			return !(*this == other);
 		}
 };
-
