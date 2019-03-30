@@ -1,3 +1,6 @@
+#pragma once
+#include <new>
+
 class Matrix
 {
 	public:
@@ -7,9 +10,12 @@ class Matrix
 					size_t cols;
 				public:
 					int* colNumber;
-					ProxyMatrix ()
+					
+					ProxyMatrix (size_t cols)
+						: cols (cols)
 
 					{
+						colNumber = new int [cols + 1];
 					}
 				
 					int& operator [] (size_t colIndex)
@@ -26,15 +32,9 @@ class Matrix
 						return colNumber [colIndex];
 					}
 					
-					void setCols(size_t c)
-					{
-						cols = c;
-						colNumber = new int [cols];
-					}
-					
 					~ProxyMatrix()
 					{
-						
+						delete [] colNumber;
 					}
 				};
 	private:
@@ -47,18 +47,14 @@ class Matrix
 		: rows(ro)
 		, cols(co)
 		{
-			rowNumber = new ProxyMatrix [rows];
-			for (size_t i = 0; i <= rows; ++i)
-			{
-				rowNumber[i].setCols (cols);
-			}
-		}
+			rowNumber = static_cast<ProxyMatrix*> (operator new [] ( rows*sizeof(ProxyMatrix) ));
+			for ( int i = 0; i <= rows; i++)
+				new (rowNumber + i) ProxyMatrix (cols);
+		}	
 		
 		~Matrix ()
 		{
-			for ( size_t i = 0; i <= rows; i++)
-				delete [] rowNumber[i].colNumber;
-			delete [] rowNumber;
+			operator delete [] (rowNumber);
 		}
 		
 		const size_t getRows () const
