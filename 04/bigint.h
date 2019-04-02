@@ -1,0 +1,50 @@
+#include <string>
+
+using namespace std;
+
+class BigInt
+{
+	private:
+		string number;
+		bool sign;
+	public:
+		BigInt (); 
+		BigInt (const string s);
+		BigInt (const string s, const bool sin); 
+
+		BigInt (const int64_t n);
+		void setNumber (const string s);
+		const string& getNumber() const;
+		void setSign (bool s);
+		const bool& getSign() const;
+		BigInt absolute() const;
+		BigInt& operator = (const BigInt b);
+		BigInt& operator = (const int64_t b);
+		BigInt& operator = (const int b);
+		bool operator == (const BigInt b)const;
+		bool operator != (const BigInt b)const;
+		bool operator > (const BigInt b)const;
+		bool operator < (const BigInt b)const;
+		bool operator >= (const BigInt b)const;
+		bool operator <= (const BigInt b)const;
+		BigInt operator + (const BigInt b)const;
+		BigInt operator * (const BigInt b)const;
+		BigInt operator - (const BigInt b)const;
+		BigInt& operator += (const BigInt b);
+		BigInt& operator -= (const BigInt b);
+		BigInt& operator *= (const BigInt b);
+		BigInt operator -();
+		operator string ();
+
+	friend ostream& operator<<(ostream& os, const BigInt& num);
+	
+	private:
+		bool equals (BigInt n1, BigInt n2) const ;
+		bool less (BigInt n1, BigInt n2) const ;
+		bool greater ( BigInt n1, BigInt n2) const ;
+		string add (string number1, string number2) const ;
+		string subtract (string number1, string number2) const ;
+		string multiply (string n1, string n2) const ;
+		string toString (long long n) const ;
+		long long toInt (string s) const ;
+};
