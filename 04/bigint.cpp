@@ -24,7 +24,7 @@ BigInt::BigInt()
 	sign = false;
 }
 
-BigInt::BigInt(const string s)
+BigInt::BigInt(const string& s)
 {
 	if (isdigit(s[0]))
 	{
@@ -40,10 +40,10 @@ BigInt::BigInt(const string s)
 
 BigInt BigInt::absolute() const
 {
-	return BigInt(getNumber());
+	return getNumber();
 }
 
-BigInt::BigInt(const string s, const bool sin)
+BigInt::BigInt(const string& s, const bool sin)
 {
 	setNumber(s);
 	setSign(sin);
@@ -69,7 +69,7 @@ BigInt::BigInt (const int64_t n)
 	}
 }
 
-void BigInt::setNumber(const string s)
+void BigInt::setNumber(const string& s)
 {
 	number = s;
 }
@@ -89,7 +89,7 @@ const bool& BigInt::getSign() const
 	return sign;
 }
 
-BigInt& BigInt::operator = (const BigInt b)
+BigInt& BigInt::operator = (const BigInt& b)
 {
 	setNumber(b.getNumber());
 	setSign(b.getSign());
@@ -112,57 +112,57 @@ BigInt& BigInt::operator = (const int b)
 	return *this;
 }
 
-bool BigInt::operator == (const BigInt b) const
+bool BigInt::operator == (const BigInt& b) const
 {
 	return equals((*this), b);
 }
 
-bool BigInt::operator != (const BigInt b) const
+bool BigInt::operator != (const BigInt& b) const
 {
 	return !equals((*this), b);
 }
 
-bool BigInt::operator > (const BigInt b) const 
+bool BigInt::operator > (const BigInt& b) const 
 {
 	return greater((*this), b);
 }
 
-bool BigInt::operator < (const BigInt b) const 
+bool BigInt::operator < (const BigInt& b) const 
 {
 	return less((*this), b);
 }
 
-bool BigInt::operator >= (const BigInt b) const 
+bool BigInt::operator >= (const BigInt& b) const 
 {
 	return equals((*this), b)
 		|| greater((*this), b);
 }
 
-bool BigInt::operator <= (const BigInt b) const 
+bool BigInt::operator <= (const BigInt& b) const 
 {
 	return equals((*this), b)
 		|| less((*this), b);
 }
 
-BigInt BigInt::operator + (const BigInt b) const
+BigInt BigInt::operator + (const BigInt& b) const
 {
 	BigInt addition;
 	if (getSign() == b.getSign())
 	{
-		addition.setNumber(add(getNumber(), b.getNumber()));
-		addition.setSign(getSign());
+		addition.setNumber (add(getNumber(), b.getNumber()));
+		addition.setSign (getSign());
 	}
 	else
 	{
 		if (absolute() > b.absolute())
 		{
-			addition.setNumber(subtract(getNumber(), b.getNumber()));
+			addition.setNumber (subtract(getNumber(), b.getNumber()));
 			addition.setSign(getSign());
 		}
 		else
 		{
-			addition.setNumber(subtract(b.getNumber(), getNumber()));
-			addition.setSign(b.getSign());
+			addition.setNumber (subtract(b.getNumber(), getNumber()));
+			addition.setSign (b.getSign());
 		}
 	}
 	if (addition.getNumber() == "0")
@@ -171,18 +171,18 @@ BigInt BigInt::operator + (const BigInt b) const
 	return addition;
 }
 
-BigInt BigInt::operator - (const BigInt b) const
+BigInt BigInt::operator - (const BigInt& b) const
 {
 	return (*this) + (b*-1);
 }
 
-BigInt& BigInt::operator += (BigInt b)
+BigInt& BigInt::operator += (const BigInt& b)
 {
 	(*this) = (*this) + b;
 	return (*this);
 }
 
-BigInt& BigInt::operator -= (BigInt b)
+BigInt& BigInt::operator -= (const BigInt& b)
 {
 	(*this) = (*this) - b;
 	return (*this);
@@ -192,11 +192,11 @@ BigInt BigInt::operator -()
 	return (*this) * -1;
 }
 
-BigInt BigInt::operator * (const BigInt b) const 
+BigInt BigInt::operator * (const BigInt& b) const 
 {
 	BigInt mul;
 
-	mul.setNumber(multiply(getNumber(), b.getNumber()));
+	mul.setNumber (multiply(getNumber(), b.getNumber()));
 	mul.setSign(getSign() != b.getSign());
 
 	if (mul.getNumber() == "0")
@@ -212,13 +212,13 @@ BigInt::operator string()
 	return signedString;
 }
 
-bool BigInt::equals(BigInt n1, BigInt n2) const 
+bool BigInt::equals (const BigInt& n1, const BigInt& n2) const 
 {
 	return n1.getNumber() == n2.getNumber()
 		&& n1.getSign() == n2.getSign();
 }
 
-bool BigInt::less(BigInt n1, BigInt n2) const 
+bool BigInt::less (const BigInt& n1, const BigInt& n2) const 
 {
 	bool sign1 = n1.getSign();
 	bool sign2 = n2.getSign();
@@ -247,12 +247,12 @@ bool BigInt::less(BigInt n1, BigInt n2) const
 	}
 }
 
-bool BigInt::greater(BigInt n1, BigInt n2) const 
+bool BigInt::greater (const BigInt& n1, const BigInt& n2) const 
 {
-	return !equals(n1, n2) && !less(n1, n2);
+	return !equals (n1, n2) && !less (n1, n2);
 }
 
-string BigInt::add(string number1, string number2) const 
+string BigInt::add (string number1, string number2) const 
 {
 	string add = (number1.length() > number2.length()) ? number1 : number2;
 	char carry = '0';
@@ -287,10 +287,10 @@ string BigInt::add(string number1, string number2) const
 	return add;
 }
 
-string BigInt::subtract(string number1, string number2) const 
+string BigInt::subtract (string number1, string number2) const 
 {
 	string sub = (number1.length()>number2.length()) ? number1 : number2;
-	int differenceInLength = abs((int)(number1.size() - number2.size()));
+	int differenceInLength = abs ((int)(number1.size() - number2.size()));
 
 	if (number1.size() > number2.size())
 		number2.insert(0, differenceInLength, '0');
@@ -314,7 +314,7 @@ string BigInt::subtract(string number1, string number2) const
 	return sub;
 }
 
-string BigInt::multiply(string n1,string n2) const 
+string BigInt::multiply (string n1, string n2) const 
 {
 	if (n1.length() > n2.length())
 		n1.swap(n2);
@@ -346,34 +346,13 @@ string BigInt::multiply(string n1,string n2) const
 
 		temp.append((n1.length() - i - 1), '0');
 
-		res = add(res, temp);
+		res = add (res, temp);
 	}
 
 	while (res[0] == '0' && res.length() != 1)
 		res.erase(0, 1);
 
 	return res;
-}
-
-string BigInt::toString(long long n) const 
-{
-	stringstream ss;
-	string temp;
-
-	ss << n;
-	ss >> temp;
-
-	return temp;
-}
-
-long long BigInt::toInt(string s) const 
-{
-	long long sum = 0;
-
-	for (int i = 0; i<s.length(); i++)
-		sum = (sum * 10) + (s[i] - '0');
-
-	return sum;
 }
 
 #endif
