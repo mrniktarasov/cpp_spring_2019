@@ -42,7 +42,8 @@ class BigInt
 		bool equals (const BigInt& n1, const BigInt& n2) const ;
 		bool less (const BigInt& n1, const BigInt& n2) const ;
 		bool greater (const BigInt& n1, const BigInt& n2) const ;
-		string add (string& number1, string& number2) const ;
-		string subtract (string& number1, string& number2) const ;
-		string multiply (string& n1, string& n2) const ;
+		string add (string number1, string number2) const ;
+		string subtract (string number1, string number2) const ;
+		string multiply (string n1, string n2) const ;
 };
+
