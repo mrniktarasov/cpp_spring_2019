@@ -1,33 +1,32 @@
 #include <iostream>
 #include <thread>
-#include <mutex>
-#include <condition_variable>
+#include <atomic>
 
-std::mutex mutex;
-std::condition_variable condOne;
-std::condition_variable condTwo;
+const size_t maxPP = 500000;
+std::atomic<bool> check (true);
 
 void ping ()
 {
-	std::unique_lock<std::mutex> lock(mutex);
-	for ( size_t i = 0; i < 500000; i++ )
-	{	
-		std::cout<<"ping"<<std::endl;
-		condTwo.notify_one();
-		condOne.wait(lock);
-	}
-	condTwo.notify_one();
+	size_t i = 0;
+	while ( i < maxPP)
+		while (check)
+		{
+			std::cout<<"ping"<<std::endl;
+			i++;
+			check = false;
+		}
 }
 
 void pong ()
-{
-	std::unique_lock<std::mutex> lock(mutex);
-	for ( size_t i = 0; i < 500000; i++ )
-	{
-		std::cout<<"pong"<<std::endl;
-		condOne.notify_one();
-		condTwo.wait(lock);
-	}
+{	
+	size_t i = 0;
+	while ( i < maxPP)
+		while (!check)
+		{
+			std::cout<<"pong"<<std::endl;
+			i++;
+			check = true;
+		}
 }
 
 int main ()
