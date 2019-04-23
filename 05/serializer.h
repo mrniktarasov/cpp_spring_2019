@@ -91,7 +91,7 @@ class Deserializer
 		}
 		
 		template <typename... ArgsT>
-		Error operator()(ArgsT... args)
+		Error operator()(ArgsT&... args)
 		{
 			return processDes(args...);
 		}
