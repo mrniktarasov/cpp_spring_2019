@@ -1,7 +1,8 @@
 #pragma once
 #include <string>       
 #include <iostream>    
-#include <sstream>  
+#include <sstream>
+#include <type_traits> 
 
 enum class Error
 {
@@ -36,34 +37,46 @@ class Serializer
 		template <class T>
 		Error process(T&& val)
 		{
-			counter++;
-			if (typeid (T) == typeid (bool))
-				{
-					if (val == true)
-						out_ << "true"<<Separator;
-					else
-						out_ << "false"<<Separator;
-					return Error::NoError;
-				}
+			if (std::is_same <uint64_t, std::remove_reference_t<T>>::value)
+				return setUint64 (std::forward<T> (val));
+			else if (std::is_same <bool, std::remove_reference_t<T>>::value)
+				return setBool (std::forward<T> (val));
 			else
-			{
-				out_ << std::to_string(val)<<Separator;
-				return Error::NoError;
-			}
+				return Error::CorruptedArchive;	
 		}
 		
 		template <typename T, typename...ArgsT>
 		Error process (T&& val, ArgsT&&...args)
 		{
-			process (std::forward <T> (val));
-			return process(std::forward<ArgsT>(args)...);
+			Error r = process (std::forward <T> (val));
+			if ( r == Error::NoError)
+				return process(std::forward<ArgsT>(args)...);
+			else 
+				return Error::CorruptedArchive;
 		}
-	
+		
+		template <class T>
+		Error setBool (T&& value)
+		{
+			if (value == true)
+				out_ << "true"<<Separator;
+			else if (value == false)
+				out_ << "false"<<Separator;
+			else
+				return Error::CorruptedArchive;
+			return Error::NoError;
+		}
+		
+		template <class T>
+		Error setUint64 (T&& value)
+		{
+			out_ <<value<<Separator;
+			return Error::NoError;
+		}
 };
 
 class Deserializer 
 {
-	static constexpr char Separator = ' ';
 	std::istream& in_;
 	public:
 		explicit Deserializer (std::istream& in)
@@ -74,50 +87,73 @@ class Deserializer
 		template <typename DT>
 		Error load (DT& object)
 		{
-			std::string input;
-			int counter = 0;
-			int64_t a1;
-			std::string b1;
-			int64_t c1;
+			return object.serialize(*this);
+		}
+		
+		template <typename... ArgsT>
+		Error operator()(ArgsT... args)
+		{
+			return processDes(args...);
+		}
+		
+	private:
+		template <class T>
+		Error processDes(T&& val)
+		{	
+			if (std::is_same <uint64_t, std::remove_reference_t<T>>::value)
+				return loadUint64 (std::forward<T> (val));
+			else if (std::is_same <bool, std::remove_reference_t<T>>::value)
+				return loadBool (std::forward<T> (val));
+			else
+				return Error::CorruptedArchive;	
+		}
+		
+		template <typename T, typename...ArgsT>
+		Error processDes (T&& val, ArgsT&&...args)
+		{
+			Error r = processDes (std::forward <T> (val));
+			if ( r == Error::NoError)
+				return processDes(std::forward<ArgsT>(args)...);
+			else 
+				return Error::CorruptedArchive;
+		}
+		
+		template <class T>
+		Error loadBool (T&& value)
+		{
+			std::string oneWord;
+			oneWord = getWord();
 			
-			getline ( in_, input );
-			std::stringstream ss (input);
-			std::string inWord;
-			
-			while (ss>>inWord)
-			{
-				if (counter == 0)
-				{
-					std::stringstream oneWord;
-					oneWord<<inWord;
-					oneWord>>a1;
-					if ( a1 < 0)
-						return Error::CorruptedArchive;
-					object.a = a1;
-				}
-				if (counter == 1)
-				{
-					if (inWord == "true")
-						object.b = true;	
-					else
-						if (inWord == "false")
-							object.b = false;
-					else
-						return Error::CorruptedArchive;
-				}
-				if (counter == 2)
-				{
-					std::stringstream oneWord;
-					oneWord<<inWord;
-					oneWord>>c1;
-					if ( c1 < 0)
-						return Error::CorruptedArchive;
-					object.c = c1;
-				}
-				counter++;
-			}
-			if (counter < 1)
+			if (oneWord == "true")
+				value = true;
+			else if (oneWord == "false")
+				value = false;
+			else
 				return Error::CorruptedArchive;
 			return Error::NoError;
+		}
+		
+		template <class T>
+		Error loadUint64 (T&& value)
+		{
+			std::stringstream ss;
+			std::string oneWord;
+			int64_t a1;
+			
+			oneWord = getWord();
+			ss<<oneWord;
+			ss>>a1;
+			
+			if ( a1 < 0)
+				return Error::CorruptedArchive;
+			value = a1;
+			return Error::NoError;
+		}
+		
+		std::string getWord()
+		{
+			std::string oneWord;
+			in_>>oneWord;
+			return oneWord;
 		}
 };
