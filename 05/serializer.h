@@ -28,7 +28,7 @@ class Serializer
 		}
 
 		template <typename... ArgsT>
-		Error operator()(ArgsT... args)
+		Error operator()(ArgsT&&... args)
 		{
 			return process(std::forward<ArgsT> (args)...);
 		}
@@ -91,7 +91,7 @@ class Deserializer
 		}
 		
 		template <typename... ArgsT>
-		Error operator()(ArgsT&... args)
+		Error operator()(ArgsT&&... args)
 		{
 			return process (std::forward<ArgsT> (args)...);
 		}
