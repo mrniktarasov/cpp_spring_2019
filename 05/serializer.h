@@ -30,7 +30,7 @@ class Serializer
 		template <typename... ArgsT>
 		Error operator()(ArgsT... args)
 		{
-			return process(args...);
+			return process(std::forward<ArgsT> (args)...);
 		}
     
 	private:
@@ -93,12 +93,12 @@ class Deserializer
 		template <typename... ArgsT>
 		Error operator()(ArgsT&... args)
 		{
-			return processDes(args...);
+			return process (std::forward<ArgsT> (args)...);
 		}
 		
 	private:
 		template <class T>
-		Error processDes(T&& val)
+		Error process(T&& val)
 		{	
 			if (std::is_same <uint64_t, std::remove_reference_t<T>>::value)
 				return loadUint64 (std::forward<T> (val));
@@ -109,11 +109,11 @@ class Deserializer
 		}
 		
 		template <typename T, typename...ArgsT>
-		Error processDes (T&& val, ArgsT&&...args)
+		Error process (T&& val, ArgsT&&...args)
 		{
-			Error r = processDes (std::forward <T> (val));
+			Error r = process (std::forward <T> (val));
 			if ( r == Error::NoError)
-				return processDes(std::forward<ArgsT>(args)...);
+				return process(std::forward<ArgsT>(args)...);
 			else 
 				return Error::CorruptedArchive;
 		}
