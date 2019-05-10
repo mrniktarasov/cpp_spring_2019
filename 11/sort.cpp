@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     std::sort(sorted.begin(),sorted.end());
 
     auto start = std::chrono::high_resolution_clock::now();
-    auto fsize = fs::file_size(fs::path{argv[1]});//размер файла
+    auto fsize = fs::file_size(fs::path{argv[1]});
     out.open(argv[2],std::ios::binary);
     if (fsize > memSize)
     {
