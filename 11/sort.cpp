@@ -82,18 +82,6 @@ int main(int argc, char **argv)
     }
     std::vector<std::uint64_t> vec(N);
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<uint32_t> uint_dist;
-    for(std::size_t i = 0; i < vec.size(); i++)
-    {
-        vec[i] = uint_dist(gen);
-    }
-    out.write((char*)vec.data()[0], vec.size()*sizeof(std::uint64_t));
-    out.close();
-    auto sorted = vec;
-    std::sort(sorted.begin(),sorted.end());
-
     auto start = std::chrono::high_resolution_clock::now();
     auto fsize = fs::file_size(fs::path{argv[1]});//размер файла
     out.open(argv[2],std::ios::binary);
@@ -194,9 +182,4 @@ int main(int argc, char **argv)
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end-start;
     std::cout << "Task takes "<< diff.count() << " s\n";
-    std::ifstream in(argv[2],std::ios::binary);
-    in.read((char*)vec.data()[0], vec.size()*sizeof(std::uint64_t));
-    in.close();
-
-    std::cout<<std::boolalpha<<(sorted==vec)<<std::endl;
 }
