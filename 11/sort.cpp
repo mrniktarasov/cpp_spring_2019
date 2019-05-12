@@ -12,29 +12,59 @@
 
 namespace fs = std::experimental::filesystem;
 
-const std::size_t kB = 1024;
-const std::size_t MB = 1024 * kB;
-const std::size_t memSize = 8*MB;
-const std::size_t Len = memSize/sizeof(std::uint64_t);
-const std::size_t N = 10*Len+3;
+constexpr std::size_t kB = 1024;
+constexpr std::size_t MB = 1024 * kB;
+constexpr std::size_t memSize = 8*MB - sizeof(std::vector);//8*MB;
+constexpr std::size_t Len = memSize/sizeof(std::uint64_t);
+constexpr std::size_t N = 3*Len+3;
+
+template<class Iter>
+void merge(Iter beg, Iter mid, Iter end) 
+{ 
+    auto p = mid-1;
+    if (*p <= *mid) 
+    { 
+        return; 
+    } 
+   
+    while (beg <= p && mid < end) 
+    { 
+        if (*beg <= *mid) 
+        { 
+            beg++; 
+        } 
+        else 
+        { 
+            auto value = *mid; 
+            auto it = mid;  
+            while (it != beg) 
+            { 
+                *it = *(it - 1); 
+                it--; 
+            } 
+            *beg = value; 
+            beg++; 
+            mid++; 
+            p++; 
+        } 
+    } 
+} 
 
 template<class Iter>
 void csort(Iter first, Iter last)
 {
     if (last - first > 1)
     {
-        auto worker = [] (Iter begin, Iter end)
-        {
-            std::sort(begin,end);
-        };
         Iter middle = first + (last - first) / 2;
-        std::thread t1(worker,first,middle);
-        std::thread t2(worker,middle, last);
+        std::thread t1(std::sort,first,middle);
+        std::thread t2(std::sort,middle, last);
         t1.join();
         t2.join();
-        std::inplace_merge(first, middle, last);
+        merge(first, middle, last);
     }
 }
+
+
 
 int main(int argc, char **argv)
 {
@@ -45,22 +75,27 @@ int main(int argc, char **argv)
     }
 
     std::ofstream out(argv[1],std::ios::binary);
+	if (!out)
+    {
+        std::cerr << "Can't open " << fileName << '\n';
+        exit(1);
+    }
     std::vector<std::uint64_t> vec(N);
 
-    std::random_device rd;  
-    std::mt19937 gen(rd()); 
+    std::random_device rd;
+    std::mt19937 gen(rd());
     std::uniform_int_distribution<uint32_t> uint_dist;
     for(std::size_t i = 0; i < vec.size(); i++)
     {
         vec[i] = uint_dist(gen);
     }
-    out.write((char*)&vec[0], vec.size()*sizeof(std::uint64_t));
+    out.write((char*)vec.data()[0], vec.size()*sizeof(std::uint64_t));
     out.close();
     auto sorted = vec;
     std::sort(sorted.begin(),sorted.end());
 
     auto start = std::chrono::high_resolution_clock::now();
-    auto fsize = fs::file_size(fs::path{argv[1]});
+    auto fsize = fs::file_size(fs::path{argv[1]});//размер файла
     out.open(argv[2],std::ios::binary);
     if (fsize > memSize)
     {
@@ -72,6 +107,11 @@ int main(int argc, char **argv)
             std::ifstream is(f1,std::ios::binary);
             std::remove(f2.c_str());
             std::ofstream os(f2,std::ios::binary|std::ios::app);
+			if (!os)
+			{
+				std::cerr << "Can't open " << fileName << '\n';
+				exit(1);
+			}
             std::size_t h = Len/2;
             std::size_t m = h;
             if (Len%2 != 0)
@@ -79,7 +119,7 @@ int main(int argc, char **argv)
                 m = Len - h;
             }
             std::vector<std::uint64_t> data(Len);
-            is.read((char*)&data[0], m*sizeof(std::uint64_t));
+            is.read((char*)data.data()[0], m*sizeof(std::uint64_t));
             fsize -= m*sizeof(std::uint64_t);
             csort(data.begin(),data.begin()+m);
 
@@ -87,25 +127,25 @@ int main(int argc, char **argv)
             {
                 if(fsize > memSize/2)
                 {
-                    is.read((char*)&data[m], h*sizeof(std::uint64_t));
+                    is.read((char*)data.data()[m], h*sizeof(std::uint64_t));
                     csort(data.begin()+m,data.end());
 
-                    std::inplace_merge(data.begin(), data.begin()+m, data.end());
-                    os.write((char*)&data[m], h*sizeof(std::uint64_t));
+                    merge(data.begin(), data.begin()+m, data.end());
+                    os.write((char*)data.data()[m], h*sizeof(std::uint64_t));
                     fsize -= h*sizeof(std::uint64_t);
                 }
                 else
                 {
                     if(fsize != 0)
                     {
-                        is.read((char*)&data[m], fsize);
+                        is.read((char*)data.data()[m], fsize);
                         data.resize(m+fsize/sizeof(std::uint64_t));
 
                         csort(data.begin()+m,data.end());
-                        std::inplace_merge(data.begin(), data.begin()+m, data.end());
-                        os.write((char*)&data[m], fsize);
+                        merge(data.begin(), data.begin()+m, data.end());
+                        os.write((char*)data.data()[m], fsize);
                     }
-                    out.write((char*)&data[0], m*sizeof(std::uint64_t));
+                    out.write((char*)data.data()[0], m*sizeof(std::uint64_t));
                     break;
                 }
             }
@@ -118,9 +158,9 @@ int main(int argc, char **argv)
             {
                 std::ifstream in(f2,std::ios::binary);
                 data.resize(csize/sizeof(std::uint64_t));
-                in.read((char*)&data[0], csize);
+                in.read((char*)data.data()[0], csize);
                 csort(data.begin(),data.end());
-                out.write((char*)&data[0], csize);
+                out.write((char*)data.data()[0], csize);
                 out.close();
                 in.close();
                 std::remove("td2");
@@ -145,17 +185,17 @@ int main(int argc, char **argv)
     else
     {
         std::ifstream in(argv[1],std::ios::binary);
-        in.read((char*)&vec[0], fsize);
+        in.read((char*)vec.data()[0], fsize);
         vec.resize(fsize/sizeof(std::uint64_t));
         csort(vec.begin(),vec.end());
-        out.write((char*)&vec[0], fsize);
+        out.write((char*)vec.data()[0], fsize);
         out.close();
     }
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end-start;
     std::cout << "Task takes "<< diff.count() << " s\n";
     std::ifstream in(argv[2],std::ios::binary);
-    in.read((char*)&vec[0], vec.size()*sizeof(std::uint64_t));
+    in.read((char*)vec.data()[0], vec.size()*sizeof(std::uint64_t));
     in.close();
 
     std::cout<<std::boolalpha<<(sorted==vec)<<std::endl;
