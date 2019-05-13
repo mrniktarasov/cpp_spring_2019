@@ -78,9 +78,8 @@ int main(int argc, char **argv)
 	if (!out)
     {
         std::cerr << "Can't open " << fileName << '\n';
-        exit(1);
+        return -1;
     }
-    std::vector<std::uint64_t> vec(N);
 
     auto start = std::chrono::high_resolution_clock::now();
     auto fsize = fs::file_size(fs::path{argv[1]});//размер файла
