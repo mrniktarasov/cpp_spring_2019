@@ -77,7 +77,7 @@ int main(int argc, char **argv)
     std::ofstream out(argv[2],std::ios::binary);
 	if (!out)
     {
-		std::cerr << "Can't open " << fileName << '\n';
+		std::cerr << "Can't open " << argv[2] << '\n';
 		return -1;
     }
 
@@ -92,11 +92,16 @@ int main(int argc, char **argv)
         {
             fsize = fs::file_size(fs::path{f1});
             std::ifstream is(f1,std::ios::binary);
+			if (!os)
+			{
+				std::cerr << "Can't open " << f1 << '\n';
+				return -1;
+			}
             std::remove(f2.c_str());
             std::ofstream os(f2,std::ios::binary|std::ios::app);
 			if (!os)
 			{
-				std::cerr << "Can't open " << fileName << '\n';
+				std::cerr << "Can't open " << f2 << '\n';
 				return -1;
 			}
             std::size_t h = Len/2;
@@ -144,6 +149,11 @@ int main(int argc, char **argv)
             if(csize <= memSize)
             {
                 std::ifstream in(f2,std::ios::binary);
+				if (!in)
+				{
+				std::cerr << "Can't open " << f2 << '\n';
+				return -1;
+				}
                 data.resize(csize/sizeof(std::uint64_t));
                 in.read((char*)data.data(), csize);
                 csort(data.begin(),data.end());
@@ -172,6 +182,11 @@ int main(int argc, char **argv)
     else
     {
         std::ifstream in(argv[1],std::ios::binary);
+		if (!in)
+		{
+			std::cerr << "Can't open " << argv[1] << '\n';
+			return -1;
+		}
         in.read((char*)vec.data(), fsize);
         vec.resize(fsize/sizeof(std::uint64_t));
         csort(vec.begin(),vec.end());
