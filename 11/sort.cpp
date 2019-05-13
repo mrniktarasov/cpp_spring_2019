@@ -21,42 +21,42 @@ constexpr std::size_t N = 3*Len+3;
 template<class Iter>
 void merge(Iter beg, Iter mid, Iter end) 
 { 
-    auto p = mid-1;
-    if (*p <= *mid) 
-    { 
-        return; 
-    } 
+	auto p = mid-1;
+    	if (*p <= *mid) 
+    	{ 
+        	return; 
+    	} 
    
-    while (beg <= p && mid < end) 
-    { 
-        if (*beg <= *mid) 
-        { 
-            beg++; 
-        } 
-        else 
-        { 
-            auto value = *mid; 
-            auto it = mid;  
-            while (it != beg) 
-            { 
-                *it = *(it - 1); 
-                it--; 
-            } 
-            *beg = value; 
-            beg++; 
-            mid++; 
-            p++; 
-        } 
-    } 
+    	while (beg <= p && mid < end) 
+    	{ 
+        	if (*beg <= *mid) 
+        	{ 
+            		beg++; 
+        	} 
+        	else 
+        	{ 
+            		auto value = *mid; 
+            		auto it = mid;  
+            		while (it != beg) 
+            	{ 
+                	*it = *(it - 1); 
+                	it--; 
+            	} 
+           		*beg = value; 
+            		beg++; 
+            		mid++; 
+            		p++; 
+        	} 
+    	} 
 } 
 
 template<class Iter>
 void csort(Iter first, Iter last)
 {
     if (last - first > 1)
-    {
-        Iter middle = first + (last - first) / 2;
-        std::thread t1(std::sort,first,middle);
+   {
+       	Iter middle = first + (last - first) / 2;
+       	std::thread t1(std::sort,first,middle);
         std::thread t2(std::sort,middle, last);
         t1.join();
         t2.join();
@@ -74,12 +74,12 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    std::ofstream out(argv[2],std::ios::binary);
+    	std::ofstream out(argv[2],std::ios::binary);
 	if (!out)
-    {
+    	{
 		std::cerr << "Can't open " << argv[2] << '\n';
 		return -1;
-    }
+   	}
 
     auto start = std::chrono::high_resolution_clock::now();
     auto fsize = fs::file_size(fs::path{argv[1]});//размер файла
@@ -90,26 +90,32 @@ int main(int argc, char **argv)
 
         while(true)
         {
-            fsize = fs::file_size(fs::path{f1});
-            std::ifstream is(f1,std::ios::binary);
-			if (!os)
-			{
-				std::cerr << "Can't open " << f1 << '\n';
-				return -1;
-			}
-            std::remove(f2.c_str());
-            std::ofstream os(f2,std::ios::binary|std::ios::app);
-			if (!os)
-			{
-				std::cerr << "Can't open " << f2 << '\n';
-				return -1;
-			}
+            	fsize = fs::file_size(fs::path{f1});
+            	std::ifstream is(f1,std::ios::binary);
+			
+		if (!is)
+		{
+			std::cerr << "Can't open " << f1 << '\n';
+			return -1;
+		}
+			
+           	std::remove(f2.c_str());
+            	std::ofstream os(f2,std::ios::binary|std::ios::app);
+			
+		if (!os)
+		{
+			std::cerr << "Can't open " << f2 << '\n';
+			return -1;
+		}
+			
             std::size_t h = Len/2;
             std::size_t m = h;
+			
             if (Len%2 != 0)
             {
                 m = Len - h;
             }
+			
             std::vector<std::uint64_t> data(Len);
             is.read((char*)data.data(), data.data()+m);
             fsize -= m*sizeof(std::uint64_t);
@@ -119,25 +125,46 @@ int main(int argc, char **argv)
             {
                 if(fsize > memSize/2)
                 {
-                    is.read((char*)data.data(), data.data()+h);
-                    csort(data.begin()+m,data.end());
+                    	is.read((char*)data.data(), data.data()+h);
+                    	csort(data.begin()+m,data.end());
 
-                    merge(data.begin(), data.begin()+m, data.end());
-                    os.write((char*)data.data(), data.data()+h);
+                    	merge(data.begin(), data.begin()+m, data.end());
+                   	os.write((char*)data.data(), data.data()+h);
+					
+			if (!os)
+			{
+				std::cerr << "Can't open " << f2 << '\n';
+				return -1;
+			}
+					
                     fsize -= h*sizeof(std::uint64_t);
                 }
                 else
                 {
                     if(fsize != 0)
-                    {
+                   {
                         is.read((char*)data.data(), fsize);
                         data.resize(m+fsize/sizeof(std::uint64_t));
 
                         csort(data.begin()+m,data.end());
                         merge(data.begin(), data.begin()+m, data.end());
                         os.write((char*)data.data(), fsize);
+						
+			if (!os)
+			{
+				std::cerr << "Can't open " << f1 << '\n';
+				return -1;
+			}
+						
                     }
-                    out.write((char*)data.data(), m*sizeof(std::uint64_t));
+                   	out.write((char*)data.data(), m*sizeof(std::uint64_t));
+					
+			if (!out)
+			{
+				std::cerr << "Can't open " << argv[2] << '\n';
+				return -1;
+			}
+					
                     break;
                 }
             }
@@ -149,15 +176,24 @@ int main(int argc, char **argv)
             if(csize <= memSize)
             {
                 std::ifstream in(f2,std::ios::binary);
-				if (!in)
-				{
-				std::cerr << "Can't open " << f2 << '\n';
-				return -1;
-				}
+				
+		if (!in)
+		{
+			std::cerr << "Can't open " << f2 << '\n';
+			return -1;
+		}
+				
                 data.resize(csize/sizeof(std::uint64_t));
                 in.read((char*)data.data(), csize);
                 csort(data.begin(),data.end());
                 out.write((char*)data.data(), csize);
+				
+		if (!out)
+		{
+			std::cerr << "Can't open " << argv[2] << '\n';
+			return -1;
+		}
+				
                 out.close();
                 in.close();
                 std::remove("td2");
@@ -182,15 +218,24 @@ int main(int argc, char **argv)
     else
     {
         std::ifstream in(argv[1],std::ios::binary);
-		if (!in)
-		{
-			std::cerr << "Can't open " << argv[1] << '\n';
-			return -1;
-		}
+		
+	if (!in)
+	{
+		std::cerr << "Can't open " << argv[1] << '\n';
+		return -1;
+	}
+		
         in.read((char*)vec.data(), fsize);
         vec.resize(fsize/sizeof(std::uint64_t));
         csort(vec.begin(),vec.end());
         out.write((char*)vec.data(), fsize);
+		
+	if (!out)
+	{
+		std::cerr << "Can't open " << argv[2] << '\n';
+		return -1;
+	}
+		
         out.close();
     }
     auto end = std::chrono::high_resolution_clock::now();
