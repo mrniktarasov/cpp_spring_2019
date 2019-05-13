@@ -74,16 +74,16 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    std::ofstream out(argv[1],std::ios::binary);
+    std::ofstream out(argv[2],std::ios::binary);
 	if (!out)
     {
-        std::cerr << "Can't open " << fileName << '\n';
-        return -1;
+		std::cerr << "Can't open " << fileName << '\n';
+		return -1;
     }
 
     auto start = std::chrono::high_resolution_clock::now();
     auto fsize = fs::file_size(fs::path{argv[1]});//размер файла
-    out.open(argv[2],std::ios::binary);
+    out.open();
     if (fsize > memSize)
     {
         std::string f1(argv[1]),f2("td2");
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 			if (!os)
 			{
 				std::cerr << "Can't open " << fileName << '\n';
-				exit(1);
+				return -1;
 			}
             std::size_t h = Len/2;
             std::size_t m = h;
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
                 m = Len - h;
             }
             std::vector<std::uint64_t> data(Len);
-            is.read((char*)data.data()[0], m*sizeof(std::uint64_t));
+            is.read((char*)data.data(), data.data()+m);
             fsize -= m*sizeof(std::uint64_t);
             csort(data.begin(),data.begin()+m);
 
@@ -114,25 +114,25 @@ int main(int argc, char **argv)
             {
                 if(fsize > memSize/2)
                 {
-                    is.read((char*)data.data()[m], h*sizeof(std::uint64_t));
+                    is.read((char*)data.data(), data.data()+h);
                     csort(data.begin()+m,data.end());
 
                     merge(data.begin(), data.begin()+m, data.end());
-                    os.write((char*)data.data()[m], h*sizeof(std::uint64_t));
+                    os.write((char*)data.data(), data.data()+h);
                     fsize -= h*sizeof(std::uint64_t);
                 }
                 else
                 {
                     if(fsize != 0)
                     {
-                        is.read((char*)data.data()[m], fsize);
+                        is.read((char*)data.data(), fsize);
                         data.resize(m+fsize/sizeof(std::uint64_t));
 
                         csort(data.begin()+m,data.end());
                         merge(data.begin(), data.begin()+m, data.end());
-                        os.write((char*)data.data()[m], fsize);
+                        os.write((char*)data.data(), fsize);
                     }
-                    out.write((char*)data.data()[0], m*sizeof(std::uint64_t));
+                    out.write((char*)data.data(), m*sizeof(std::uint64_t));
                     break;
                 }
             }
@@ -145,9 +145,9 @@ int main(int argc, char **argv)
             {
                 std::ifstream in(f2,std::ios::binary);
                 data.resize(csize/sizeof(std::uint64_t));
-                in.read((char*)data.data()[0], csize);
+                in.read((char*)data.data(), csize);
                 csort(data.begin(),data.end());
-                out.write((char*)data.data()[0], csize);
+                out.write((char*)data.data(), csize);
                 out.close();
                 in.close();
                 std::remove("td2");
@@ -172,10 +172,10 @@ int main(int argc, char **argv)
     else
     {
         std::ifstream in(argv[1],std::ios::binary);
-        in.read((char*)vec.data()[0], fsize);
+        in.read((char*)vec.data(), fsize);
         vec.resize(fsize/sizeof(std::uint64_t));
         csort(vec.begin(),vec.end());
-        out.write((char*)vec.data()[0], fsize);
+        out.write((char*)vec.data(), fsize);
         out.close();
     }
     auto end = std::chrono::high_resolution_clock::now();
